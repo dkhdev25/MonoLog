@@ -4,6 +4,13 @@ import './style.css'
 // vars
 let scene = 'menu';
 let keybind = null;
+let keyPressTime = 0;
+let currentIndex = -1;
+let devlogs = [
+  { title: 'Devlog 1', content: '...' },
+  { title: 'Devlog 2', content: '...' },
+  { title: 'Devlog 3', content: '...' }
+];
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -20,6 +27,34 @@ document.addEventListener('keydown', (event) => {
         setTimeout(() => {
         document.querySelector('.app').style.display = 'none';
         scene = 'selection';
+        document.querySelector('.selectionHint').style.animation = 'fadeIn 0.6s ease-out 0.5s forwards';
+        document.querySelector('.selection').style.display = 'block';
         }, 600);
     }
+
+    // selection
+    if (scene === 'selection' && key === keybind) {
+    keyPressTime = Date.now();
+    currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
+    updateSelection();
+    }
 });
+
+document.addEventListener('keyup', (event) => {
+  const key = event.key.toLowerCase();
+  if (scene === 'selection' && key === keybind) {
+    const holdTime = Date.now() - keyPressTime;
+    if (holdTime > 500) {
+      scene = 'writing';
+      console.log('Entering devlog:', currentIndex);
+    }
+  }
+});
+
+function updateSelection() {
+  const cards = document.querySelectorAll('.devlog-card');
+  cards.forEach((card, i) => {
+    card.classList.remove('active');
+    if (i === currentIndex) card.classList.add('active');
+  });
+}
