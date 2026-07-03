@@ -46,17 +46,33 @@ document.addEventListener('keydown', (event) => {
         }, 600);
     }
 
-    // selection
-    if (scene === 'selection' && key === keybind) {
-      keyPressTime = Date.now();
-      enteredDevlog = false;
+// selection
+if (scene === 'selection' && key === keybind) {
+  keyPressTime = Date.now();
+  enteredDevlog = false;
 
-      holdTimer = setTimeout(() => {
-        enteredDevlog = true;
-        scene = 'writing';
+  holdTimer = setTimeout(() => {
 
-      }, 500);
-    }
+    enteredDevlog = true;
+
+    document.querySelector(".selectionHint").style.animation =
+        "fadeOutUpHint 0.4s ease forwards";
+
+    const cards = document.querySelectorAll(".devlog-card");
+
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+          card.classList.add("hide");
+      }, index * 120);
+    });
+
+    setTimeout(() => {
+        document.querySelector(".selection").style.display = "none";
+        scene = "writing";
+    }, 900);
+
+  }, 500);
+}
 });
 
 document.addEventListener('keyup', (event) => {
