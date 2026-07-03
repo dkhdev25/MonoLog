@@ -6,6 +6,8 @@ let scene = 'menu';
 let keybind = null;
 let keyPressTime = 0;
 let currentIndex = -1;
+let holdTimer = null;
+let enteredDevlog = false;
 let devlogs = [
   { title: 'Devlog 1', content: '...' },
   { title: 'Devlog 2', content: '...' },
@@ -46,21 +48,29 @@ document.addEventListener('keydown', (event) => {
 
     // selection
     if (scene === 'selection' && key === keybind) {
-    keyPressTime = Date.now();
-    currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
-    updateSelection();
+      keyPressTime = Date.now();
+      enteredDevlog = false;
+
+      holdTimer = setTimeout(() => {
+        enteredDevlog = true;
+        scene = 'writing';
+
+      }, 500);
     }
 });
 
 document.addEventListener('keyup', (event) => {
-  const key = event.key.toLowerCase();
-  if (scene === 'selection' && key === keybind) {
-    const holdTime = Date.now() - keyPressTime;
-    if (holdTime > 500) {
-      scene = 'writing';
-      console.log('Entering devlog:', currentIndex);
+    const key = event.key.toLowerCase();
+
+    if (scene === 'selection' && key === keybind) {
+
+        clearTimeout(holdTimer);
+
+        if (!enteredDevlog) {
+            currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
+            updateSelection();
+        }
     }
-  }
 });
 
 function updateSelection() {

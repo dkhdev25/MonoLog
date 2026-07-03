@@ -184,7 +184,7 @@ h1 {
     width: 250px;
     height: 300px;
     background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(3px);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 12px;
 
