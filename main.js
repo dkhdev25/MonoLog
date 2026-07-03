@@ -29,6 +29,18 @@ document.addEventListener('keydown', (event) => {
         scene = 'selection';
         document.querySelector('.selectionHint').style.animation = 'fadeIn 0.6s ease-out 0.5s forwards';
         document.querySelector('.selection').style.display = 'block';
+
+        currentIndex = 0;
+        updateSelection();
+
+        const cards = document.querySelectorAll('.devlog-card');
+
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add('show');
+          }, index * 120);
+        });
+
         }, 600);
     }
 
