@@ -70,6 +70,10 @@ if (scene === 'selection' && key === keybind) {
         document.querySelector(".selection").style.display = "none";
         scene = "writing";
         document.querySelector('.editor').style.display = 'flex';
+
+        document.querySelectorAll('.panel').forEach((panel) => {
+          panel.classList.add('show');
+        });
     }, 900);
 
   }, 500);
