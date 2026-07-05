@@ -69,6 +69,7 @@ if (scene === 'selection' && key === keybind) {
     setTimeout(() => {
         document.querySelector(".selection").style.display = "none";
         scene = "writing";
+        document.querySelector('.editor').style.display = 'flex';
     }, 900);
 
   }, 500);
