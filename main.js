@@ -7,12 +7,19 @@ let keybind = null;
 let keyPressTime = 0;
 let currentIndex = -1;
 let holdTimer = null;
+let mode = 1;
+
 let enteredDevlog = false;
 let devlogs = [
   { title: 'Devlog 1', content: '...' },
   { title: 'Devlog 2', content: '...' },
   { title: 'Devlog 3', content: '...' }
 ];
+
+const editor = document.querySelector(".editorInput");
+editor.focus();
+
+updateMode();
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -100,4 +107,17 @@ function updateSelection() {
     card.classList.remove('active');
     if (i === currentIndex) card.classList.add('active');
   });
+}
+
+function updateMode() {
+    const modeText = document.getElementById("modeText");
+
+    if (mode === 1)
+        modeText.textContent = "Change Key";
+
+    else if (mode === 2)
+        modeText.textContent = "Type Key";
+
+    else
+        modeText.textContent = "Autofill";
 }
