@@ -7,8 +7,10 @@ let keybind = null;
 let keyPressTime = 0;
 let currentIndex = -1;
 let holdTimer = null;
-let mode = 1;
-
+let mode = 1; // 1 = change, 2 = type, 3 = fill
+let currentGroup = 0;
+let selectedCharacter = 0;
+let lastTap = 0;
 let enteredDevlog = false;
 let devlogs = [
   { title: 'Devlog 1', content: '...' },
@@ -16,10 +18,38 @@ let devlogs = [
   { title: 'Devlog 3', content: '...' }
 ];
 
-const editor = document.querySelector(".editorInput");
-editor.focus();
+const groups = [
+  {
+    name: "letters",
+    keys: "abcdefghijklmnopqrstuvwxyz".split("")
+  },
 
-updateMode();
+  {
+    name: "numbers",
+    keys: "0123456789".split("")
+  },
+
+  {
+    name: "symbols",
+    keys: [
+      ".", ",", "!", "?", "'", "\"",
+      "(", ")", "[", "]", "{", "}",
+      "+", "-", "*", "/", "=",
+      "@", "#", "$", "%", "&",
+      ":", ";", "_"
+    ]
+  },
+
+  {
+    name: "actions",
+    keys: [
+      "Space",
+      "Enter",
+      "Tab"
+    ]
+  }
+]
+const editor = document.querySelector(".editorInput");
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -78,6 +108,12 @@ if (scene === 'selection' && key === keybind) {
         scene = "writing";
         document.querySelector('.editor').style.display = 'flex';
 
+        updateMode();
+        updateKeyboardDebug();
+        
+        const editor = document.querySelector(".editorInput");
+        editor.focus();
+
         document.querySelectorAll('.panel').forEach((panel) => {
           panel.classList.add('show');
         });
@@ -120,4 +156,16 @@ function updateMode() {
 
     else
         modeText.textContent = "Autofill";
+}
+
+function selectedKey() {
+    return groups[currentGroup].keys[selectedCharacter];
+}
+
+function updateKeyboardDebug() {
+    document.getElementById("groupText").textContent =
+        groups[currentGroup].name;
+
+    document.getElementById("keyText").textContent =
+        selectedKey();
 }
