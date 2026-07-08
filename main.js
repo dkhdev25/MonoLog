@@ -7,11 +7,12 @@ let keybind = null;
 let keyPressTime = 0;
 let currentIndex = -1;
 let holdTimer = null;
-let mode = 1; // 1 = change, 2 = type, 3 = fill
+let mode = 2; // 1 = change, 2 = type, 3 = fill
 let currentGroup = 0;
 let selectedCharacter = 0;
 let lastTap = 0;
 let enteredDevlog = false;
+let editorText = "";
 let devlogs = [
   { title: 'Devlog 1', content: '...' },
   { title: 'Devlog 2', content: '...' },
@@ -21,7 +22,7 @@ let devlogs = [
 const groups = [
   {
     name: "letters",
-    keys: "abcdefghijklmnopqrstuvwxyz".split("")
+    keys: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
   },
 
   {
@@ -49,7 +50,6 @@ const groups = [
     ]
   }
 ]
-const editor = document.querySelector(".editorInput");
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -107,12 +107,12 @@ if (scene === 'selection' && key === keybind) {
         document.querySelector(".selection").style.display = "none";
         scene = "writing";
         document.querySelector('.editor').style.display = 'flex';
-
+        
+        renderEditor();
         updateMode();
         updateKeyboardDebug();
         
         const editor = document.querySelector(".editorInput");
-        editor.focus();
 
         document.querySelectorAll('.panel').forEach((panel) => {
           panel.classList.add('show');
@@ -121,6 +121,18 @@ if (scene === 'selection' && key === keybind) {
 
   }, 500);
 }
+
+if (scene === "writing" && key === keybind){
+
+      if(mode === 1){
+        nextCharacter();
+      }
+
+      if(mode === 2){
+        typeCharacter();
+      }
+
+    }
 });
 
 document.addEventListener('keyup', (event) => {
@@ -168,4 +180,45 @@ function updateKeyboardDebug() {
 
     document.getElementById("keyText").textContent =
         selectedKey();
+}
+
+function nextCharacter(){
+
+    selectedCharacter++;
+
+    if(selectedCharacter >= groups[currentGroup].keys.length){
+        selectedCharacter = 0;
+    }
+
+    updateKeyboardDebug();
+}
+
+
+function typeCharacter(){
+
+    let char = selectedKey();
+
+    if(char === "Space"){
+        editorText += " ";
+    }
+
+    else if(char === "Enter"){
+        editorText += "\n";
+    }
+
+    else if(char === "Tab"){
+        editorText += "    ";
+    }
+
+    else{
+        editorText += char;
+    }
+
+    renderEditor();
+}
+
+function renderEditor(){
+
+    document.querySelector(".text").innerText = editorText;
+
 }
