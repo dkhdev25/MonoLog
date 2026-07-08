@@ -1,0 +1,24 @@
+{
+  "name": "monolog",
+  "version": "1.0.0",
+  "description": "A minimalist website for writing personal devlogs. This project is fully compatible with any computer and uses a single-key interaction system. Designed for ease of use, it focuses on organization, simplicity, and productivity.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkhdev25/MonoLog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dkhdev25/MonoLog/issues"
+  },
+  "homepage": "https://github.com/dkhdev25/MonoLog#readme",
+  "dependencies": {
+    "vite": "^8.1.3"
+  }
+}

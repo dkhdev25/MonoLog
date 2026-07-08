@@ -12,11 +12,12 @@ let currentGroup = 0;
 let selectedCharacter = 0;
 let lastTap = 0;
 let enteredDevlog = false;
+let currentDevlog = null;
 let editorText = "";
 let devlogs = [
-  { title: 'Devlog 1', content: '...' },
-  { title: 'Devlog 2', content: '...' },
-  { title: 'Devlog 3', content: '...' }
+  { title: 'Devlog 1', content: '' },
+  { title: 'Devlog 2', content: '' },
+  { title: 'Devlog 3', content: '' }
 ];
 
 const groups = [
@@ -106,6 +107,25 @@ if (scene === 'selection' && key === keybind) {
     setTimeout(() => {
         document.querySelector(".selection").style.display = "none";
         scene = "writing";
+
+        if (currentIndex === devlogs.length) {
+            currentDevlog = {
+            title: "New Devlog",
+            content: ""
+        };
+
+        devlogs.push(currentDevlog);
+
+        } 
+        else {
+          currentDevlog = devlogs[currentIndex];
+        }
+
+        editorText = currentDevlog.content;
+
+        document.getElementById("devlogTitle").textContent =
+        currentDevlog.title.toUpperCase();
+
         document.querySelector('.editor').style.display = 'flex';
         
         renderEditor();
@@ -213,6 +233,8 @@ function typeCharacter(){
     else{
         editorText += char;
     }
+
+    currentDevlog.content = editorText;
 
     renderEditor();
 }
