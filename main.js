@@ -89,6 +89,8 @@ if (scene === 'selection' && key === keybind) {
   keyPressTime = Date.now();
   enteredDevlog = false;
 
+  const selectedIndex = currentIndex;
+
   holdTimer = setTimeout(() => {
 
     enteredDevlog = true;
@@ -108,17 +110,18 @@ if (scene === 'selection' && key === keybind) {
         document.querySelector(".selection").style.display = "none";
         scene = "writing";
 
-        if (currentIndex === devlogs.length) {
-            currentDevlog = {
+        if (selectedIndex === devlogs.length) {
+          currentDevlog = {
             title: "New Devlog",
             content: ""
-        };
+          };
 
         devlogs.push(currentDevlog);
 
         } 
+
         else {
-          currentDevlog = devlogs[currentIndex];
+          currentDevlog = devlogs[selectedIndex];
         }
 
         editorText = currentDevlog.content;
@@ -160,9 +163,9 @@ document.addEventListener('keyup', (event) => {
 
     if (scene === 'selection' && key === keybind) {
 
-        clearTimeout(holdTimer);
-
         if (!enteredDevlog) {
+            clearTimeout(holdTimer);
+
             currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
             updateSelection();
         }
