@@ -4,7 +4,6 @@ import './style.css'
 // vars
 let scene = 'menu';
 let keybind = null;
-let keyPressTime = 0;
 let currentIndex = -1;
 let holdTimer = null;
 let mode = 2; // 1 = change, 2 = type, 3 = fill
@@ -23,7 +22,7 @@ let devlogs = [
 const groups = [
   {
     name: "letters",
-    keys: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+    keys: "abcdefghijklmnopqrstuvwxyz".split("")
   },
 
   {
@@ -86,7 +85,6 @@ document.addEventListener('keydown', (event) => {
 
 // selection
 if (scene === 'selection' && key === keybind) {
-  keyPressTime = Date.now();
   enteredDevlog = false;
 
   const selectedIndex = currentIndex;
@@ -134,8 +132,6 @@ if (scene === 'selection' && key === keybind) {
         renderEditor();
         updateMode();
         updateKeyboardDebug();
-        
-        const editor = document.querySelector(".editorInput");
 
         document.querySelectorAll('.panel').forEach((panel) => {
           panel.classList.add('show');
@@ -145,21 +141,30 @@ if (scene === 'selection' && key === keybind) {
   }, 500);
 }
 
-if (scene === "writing" && key === keybind){
+if (scene === "writing" && key === keybind) {
 
-      if(mode === 1){
-        nextCharacter();
-      }
+    enteredDevlog = false;
 
-      if(mode === 2){
-        typeCharacter();
-      }
+    holdTimer = setTimeout(() => {
+        enteredDevlog = true;
+        handleHold();
+    }, 500);
 
-    }
+}
 });
 
 document.addEventListener('keyup', (event) => {
     const key = event.key.toLowerCase();
+
+    if (scene === "writing" && key === keybind) {
+
+      clearTimeout(holdTimer);
+
+      if (!enteredDevlog) {
+        handleTap();
+      }
+
+    }
 
     if (scene === 'selection' && key === keybind) {
 
@@ -245,5 +250,100 @@ function typeCharacter(){
 function renderEditor(){
 
     document.querySelector(".text").innerText = editorText;
+
+}
+
+function switchMode(){
+
+    mode++;
+
+    if(mode > 3){
+        mode = 1;
+    }
+
+    updateMode();
+
+}
+
+function nextGroup(){
+
+    currentGroup++;
+
+    if(currentGroup >= groups.length){
+        currentGroup = 0;
+    }
+
+    selectedCharacter = 0;
+
+    updateKeyboardDebug();
+
+}
+
+function handleTap(){
+
+    let now = Date.now();
+
+    // double tap detection
+    if(now - lastTap < 300){
+
+        switchMode();
+
+        lastTap = 0;
+        return;
+    }
+
+    lastTap = now;
+
+
+    if(mode === 1){
+
+        nextCharacter();
+
+    }
+
+    else if(mode === 2){
+
+        typeCharacter();
+
+    }
+
+    else if(mode === 3){
+
+        autofill();
+
+    }
+
+}
+
+
+function handleHold(){
+
+    if(mode === 1){
+
+        nextGroup();
+
+    }
+
+    else if(mode === 2){
+
+        backspace();
+
+    }
+
+    else if(mode === 3){
+
+        cycleAutofill();
+
+    }
+
+}
+
+function backspace(){
+
+    editorText = editorText.slice(0,-1);
+
+    currentDevlog.content = editorText;
+
+    renderEditor();
 
 }
