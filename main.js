@@ -52,13 +52,11 @@ const groups = [
       "Tab"
     ]
   }
-]
+];
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
   const key = event.key.toLowerCase();
-
-  keyHeld = true;
 
     // set keybind
     if (scene === 'menu' && keybind === null) {
