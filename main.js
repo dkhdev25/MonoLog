@@ -9,10 +9,13 @@ let holdTimer = null;
 let mode = 2; // 1 = change, 2 = type, 3 = fill
 let currentGroup = 0;
 let selectedCharacter = 0;
-let lastTap = 0;
-let enteredDevlog = false;
+let holdTriggered = false;
+let tapTimer = null;
+let waitingForSecondTap = false;
+let groupTimer = null;
 let currentDevlog = null;
 let editorText = "";
+let keyHeld = false;
 let devlogs = [
   { title: 'Devlog 1', content: '' },
   { title: 'Devlog 2', content: '' },
@@ -55,6 +58,8 @@ const groups = [
 document.addEventListener('keydown', (event) => {
   const key = event.key.toLowerCase();
 
+  keyHeld = true;
+
     // set keybind
     if (scene === 'menu' && keybind === null) {
         document.querySelector('.about').style.animation = 'none';
@@ -85,13 +90,13 @@ document.addEventListener('keydown', (event) => {
 
 // selection
 if (scene === 'selection' && key === keybind) {
-  enteredDevlog = false;
+  holdTriggered = false;
 
   const selectedIndex = currentIndex;
 
   holdTimer = setTimeout(() => {
 
-    enteredDevlog = true;
+    holdTriggered = true;
 
     document.querySelector(".selectionHint").style.animation =
         "fadeOutUpHint 0.4s ease forwards";
@@ -141,34 +146,60 @@ if (scene === 'selection' && key === keybind) {
   }, 500);
 }
 
-if (scene === "writing" && key === keybind) {
+    // writing
+    if (scene === "writing" && key === keybind) {
+        
+         if(event.repeat) return;
 
-    enteredDevlog = false;
+        keyHeld = true;
+        holdTriggered = false;
 
-    holdTimer = setTimeout(() => {
-        enteredDevlog = true;
-        handleHold();
-    }, 500);
+        holdTimer = setTimeout(() => {
+
+        if (!keyHeld) return;
+
+            holdTriggered = true;
+
+            handleHold();
+
+            if(groupTimer) return;
+
+            groupTimer = setInterval(() => {
+            if(keyHeld){
+                handleHold();
+            }
+        }, 120);
+
+}, 600);
 
 }
 });
 
 document.addEventListener('keyup', (event) => {
     const key = event.key.toLowerCase();
+    if(key !== keybind) return;
 
     if (scene === "writing" && key === keybind) {
 
-      clearTimeout(holdTimer);
+        keyHeld = false;
 
-      if (!enteredDevlog) {
-        handleTap();
-      }
+        clearTimeout(holdTimer);
+        clearInterval(groupTimer);
+
+        holdTimer = null;
+        groupTimer = null;
+
+        if (!holdTriggered) {
+            handleTap();
+        }
+
+        holdTriggered = false;
 
     }
 
     if (scene === 'selection' && key === keybind) {
 
-        if (!enteredDevlog) {
+        if (!holdTriggered) {
             clearTimeout(holdTimer);
 
             currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
@@ -281,37 +312,37 @@ function nextGroup(){
 
 function handleTap(){
 
-    let now = Date.now();
+    if(waitingForSecondTap){
 
-    // double tap detection
-    if(now - lastTap < 300){
+        clearTimeout(tapTimer);
+        tapTimer = null;
+        waitingForSecondTap = false;
 
         switchMode();
-
-        lastTap = 0;
         return;
     }
 
-    lastTap = now;
+
+    waitingForSecondTap = true;
 
 
-    if(mode === 1){
+    tapTimer = setTimeout(() => {
 
-        nextCharacter();
+        waitingForSecondTap = false;
 
-    }
+        if(mode === 1){
+            nextCharacter();
+        }
 
-    else if(mode === 2){
+        else if(mode === 2){
+            typeCharacter();
+        }
 
-        typeCharacter();
+        else if(mode === 3){
+            autofill();
+        }
 
-    }
-
-    else if(mode === 3){
-
-        autofill();
-
-    }
+    }, 180);
 
 }
 
@@ -332,7 +363,7 @@ function handleHold(){
 
     else if(mode === 3){
 
-        cycleAutofill();
+        autofill();
 
     }
 
