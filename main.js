@@ -22,6 +22,10 @@ let devlogs = [
   { title: 'Devlog 3', content: '' }
 ];
 
+let learnedWords = [];
+let words = [];
+let currentSuggestion = "";
+
 const groups = [
   {
     name: "letters",
@@ -53,6 +57,15 @@ const groups = [
     ]
   }
 ];
+
+fetch("./words.txt")
+    .then(response => response.text())
+    .then(text => {
+        words = text
+            .split("\n")
+            .map(word => word.trim())
+            .filter(word => word.length);
+    });
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -256,6 +269,13 @@ function typeCharacter(){
     let char = selectedKey();
 
     if(char === "Space"){
+
+        let word = getCurrentWord();
+
+        if(word.length >= 3 && !learnedWords.includes(word)){
+            learnedWords.push(word);
+        }
+
         editorText += " ";
     }
 
@@ -274,13 +294,23 @@ function typeCharacter(){
     currentDevlog.content = editorText;
 
     renderEditor();
+    updateSuggestion();
 }
 
 function renderEditor(){
 
-    document.querySelector(".text").innerText = editorText;
+    let text = document.querySelector(".text");
 
-}
+    let remaining = "";
+
+    if(currentSuggestion){
+        remaining = currentSuggestion.slice(getCurrentWord().length);
+    }
+
+    text.innerHTML =
+    editorText +
+    `<span class="suggestion">${remaining}</span>`;
+} 
 
 function switchMode(){
 
@@ -340,7 +370,7 @@ function handleTap(){
             autofill();
         }
 
-    }, 180);
+    }, 190);
 
 }
 
@@ -371,8 +401,52 @@ function backspace(){
 
     editorText = editorText.slice(0,-1);
 
+    currentSuggestion = "";
+
     currentDevlog.content = editorText;
 
     renderEditor();
 
+}
+
+function getCurrentWord() {
+    return editorText.split(/\s+/).pop().toLowerCase();
+}
+
+function getSuggestions(prefix) {
+
+    if(prefix.length < 3){
+        return [];
+    }
+
+    prefix = prefix.toLowerCase();
+
+    let personal = learnedWords.filter(word =>
+        word.startsWith(prefix)
+    );
+
+    let dictionary = words.filter(word =>
+        word.startsWith(prefix)
+    );
+
+    return [
+        ...personal,
+        ...dictionary
+    ];
+
+}
+
+function updateSuggestion(){
+
+    let word = getCurrentWord();
+
+    let suggestions = getSuggestions(word);
+
+    if(suggestions.length > 0){
+        currentSuggestion = suggestions[0];
+    }
+
+    else{
+        currentSuggestion = "";
+    }
 }

@@ -330,3 +330,7 @@ h1 {
 
     text-align: left;
 }
+
+.suggestion {
+    opacity: 0.35;
+}
