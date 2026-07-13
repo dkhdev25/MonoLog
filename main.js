@@ -25,6 +25,7 @@ let devlogs = [
 let learnedWords = [];
 let words = [];
 let currentSuggestion = "";
+let cursorIndex = 0
 
 const groups = [
   {
@@ -139,6 +140,7 @@ if (scene === 'selection' && key === keybind) {
         }
 
         editorText = currentDevlog.content;
+        cursorIndex = editorText.length;
 
         document.getElementById("devlogTitle").textContent =
         currentDevlog.title.toUpperCase();
@@ -276,19 +278,39 @@ function typeCharacter(){
             learnedWords.push(word);
         }
 
-        editorText += " ";
+        editorText =
+        editorText.slice(0, cursorIndex) +
+        " " +
+        editorText.slice(cursorIndex);
+
+        cursorIndex++;
     }
 
     else if(char === "Enter"){
-        editorText += "\n";
+        editorText =
+        editorText.slice(0, cursorIndex) +
+        "\n" +
+        editorText.slice(cursorIndex);
+
+        cursorIndex++;
     }
 
     else if(char === "Tab"){
-        editorText += "    ";
+        editorText =
+        editorText.slice(0, cursorIndex) +
+        "    " +
+        editorText.slice(cursorIndex);
+
+        cursorIndex += 4;
     }
 
     else{
-        editorText += char;
+        editorText =
+        editorText.slice(0, cursorIndex) +
+        char +
+        editorText.slice(cursorIndex);
+
+        cursorIndex += char.length;
     }
 
     currentDevlog.content = editorText;
@@ -300,19 +322,27 @@ function renderEditor() {
 
     const text = document.querySelector(".text");
 
-    if (mode !== 3 || currentSuggestion === "") {
+    const beforeCursor = editorText.slice(0, cursorIndex);
+    const afterCursor = editorText.slice(cursorIndex);
+
+    if(mode !== 3 || currentSuggestion === "") {
+
         text.innerHTML =
-            editorText +
-            `<span class="cursor"></span>`;
+            beforeCursor +
+            `<span class="cursor"></span>` +
+            afterCursor;
+
         return;
     }
 
-    const remaining = currentSuggestion.slice(getCurrentWord().length);
+    const remaining =
+        currentSuggestion.slice(getCurrentWord().length);
 
     text.innerHTML =
-        editorText +
+        beforeCursor +
         `<span class="cursor"></span>` +
-        `<span class="suggestion">${remaining}</span>`;
+        `<span class="suggestion">${remaining}</span>` +
+        afterCursor;
 }
 
 function switchMode(){
@@ -403,7 +433,15 @@ function handleHold(){
 
 function backspace(){
 
-    editorText = editorText.slice(0,-1);
+    if(cursorIndex <= 0){
+        return;
+    }
+
+    editorText =
+        editorText.slice(0, cursorIndex - 1) +
+        editorText.slice(cursorIndex);
+
+    cursorIndex--;
 
     currentDevlog.content = editorText;
 
@@ -411,7 +449,14 @@ function backspace(){
 }
 
 function getCurrentWord() {
-    return editorText.split(/\s+/).pop().toUpperCase();
+
+    let beforeCursor = editorText.slice(0, cursorIndex);
+
+    return beforeCursor
+        .split(/\s+/)
+        .pop()
+        .toUpperCase();
+
 }
 
 function getSuggestions(prefix) {
