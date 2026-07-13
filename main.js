@@ -26,6 +26,8 @@ let learnedWords = [];
 let words = [];
 let currentSuggestion = "";
 let cursorIndex = 0;
+let suggestionIndex = 0;
+let suggestions = [];
 
 const groups = [
   {
@@ -318,21 +320,56 @@ function typeCharacter(){
     updateSuggestion();
 }
 
-function renderEditor() {
+function renderEditor(){
 
-    cursorIndex = Math.max(0, Math.min(cursorIndex, editorText.length));
+    cursorIndex = Math.max(
+        0,
+        Math.min(cursorIndex, editorText.length)
+    );
 
     const text = document.querySelector(".text");
 
     const beforeCursor = editorText.slice(0, cursorIndex);
     const afterCursor = editorText.slice(cursorIndex);
 
-    const cursor = "\u200A\u200A\u200A\u200A\u200A▋"
 
-    text.textContent =
-        beforeCursor +
-        cursor +
-        afterCursor;
+    text.textContent = "";
+
+
+    text.appendChild(
+        document.createTextNode(beforeCursor)
+    );
+
+
+    const cursor = document.createTextNode(
+        "I"
+    );
+
+    text.appendChild(cursor);
+
+
+    if(mode === 3 && currentSuggestion){
+
+        const remaining =
+            currentSuggestion.slice(
+                getCurrentWord().length
+            );
+
+
+        const suggestion =
+            document.createElement("span");
+
+        suggestion.className = "suggestion";
+
+        suggestion.textContent = remaining;
+
+        text.appendChild(suggestion);
+    }
+
+
+    text.appendChild(
+        document.createTextNode(afterCursor)
+    );
 }
 
 function switchMode(){
@@ -476,20 +513,25 @@ function updateSuggestion(){
 
     if(mode !== 3){
         currentSuggestion = "";
+        suggestions = [];
+        suggestionIndex = 0;
         renderEditor();
         return;
     }
 
-    let word = getCurrentWord();
+    const word = getCurrentWord();
+    
+    suggestionIndex = 0;
 
-    let suggestions = getSuggestions(word);
+    suggestions = getSuggestions(word);
 
     if(suggestions.length > 0){
-        currentSuggestion = suggestions[0];
+        currentSuggestion = suggestions[suggestionIndex % suggestions.length];
     }
 
     else{
         currentSuggestion = "";
+        suggestionIndex = 0;
     }
 
     renderEditor();
@@ -532,7 +574,6 @@ function placeCursor(event){
 
             if(!rect) continue;
 
-
             const distance =
                 Math.abs(event.clientY - rect.top) * 3 +
                 Math.abs(event.clientX - rect.left);
@@ -552,5 +593,5 @@ function placeCursor(event){
 
     cursorIndex = best.index;
 
-    renderEditor();
+    updateSuggestion();
 }
