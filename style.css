@@ -178,7 +178,7 @@ h1 {
   display: none;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
   z-index: 2;
 }
@@ -293,15 +293,6 @@ h1 {
   margin: 0 0 16px 0;
 }
 
-.cursor {
-    display: inline-block;
-    width: 9px;
-    height: 18px;
-    background: white;
-    margin-left: 2px;
-    vertical-align: -3px;
-}
-
 @keyframes blink {
     50% {
         opacity: 0;
@@ -325,11 +316,15 @@ h1 {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 
-    overflow: hidden;
+    overflow: auto;
 
     text-align: left;
 }
 
 .suggestion {
     opacity: 0.35;
+}
+
+.text {
+    white-space: pre-wrap;
 }

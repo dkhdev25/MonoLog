@@ -25,7 +25,7 @@ let devlogs = [
 let learnedWords = [];
 let words = [];
 let currentSuggestion = "";
-let cursorIndex = 0
+let cursorIndex = 0;
 
 const groups = [
   {
@@ -320,28 +320,18 @@ function typeCharacter(){
 
 function renderEditor() {
 
+    cursorIndex = Math.max(0, Math.min(cursorIndex, editorText.length));
+
     const text = document.querySelector(".text");
 
     const beforeCursor = editorText.slice(0, cursorIndex);
     const afterCursor = editorText.slice(cursorIndex);
 
-    if(mode !== 3 || currentSuggestion === "") {
+    const cursor = "\u200A\u200A\u200A\u200A\u200A▋"
 
-        text.innerHTML =
-            beforeCursor +
-            `<span class="cursor"></span>` +
-            afterCursor;
-
-        return;
-    }
-
-    const remaining =
-        currentSuggestion.slice(getCurrentWord().length);
-
-    text.innerHTML =
+    text.textContent =
         beforeCursor +
-        `<span class="cursor"></span>` +
-        `<span class="suggestion">${remaining}</span>` +
+        cursor +
         afterCursor;
 }
 
@@ -501,6 +491,66 @@ function updateSuggestion(){
     else{
         currentSuggestion = "";
     }
+
+    renderEditor();
+}
+
+document.querySelector(".editorInput").addEventListener("pointerdown", placeCursor);
+
+function placeCursor(event){
+
+    const text = document.querySelector(".text");
+
+    const walker = document.createTreeWalker(
+        text,
+        NodeFilter.SHOW_TEXT
+    );
+
+    let best = {
+        distance: Infinity,
+        index: editorText.length
+    };
+
+    let index = 0;
+
+    while(walker.nextNode()){
+
+        const node = walker.currentNode;
+
+        if(node.parentElement?.classList.contains("suggestion")){
+            continue;
+        }
+
+        for(let i = 0; i <= node.length; i++){
+
+            const range = document.createRange();
+
+            range.setStart(node, i);
+            range.setEnd(node, i);
+
+            const rect = range.getClientRects()[0];
+
+            if(!rect) continue;
+
+
+            const distance =
+                Math.abs(event.clientY - rect.top) * 3 +
+                Math.abs(event.clientX - rect.left);
+
+
+            if(distance < best.distance){
+
+                best.distance = distance;
+                best.index = index + i;
+
+            }
+        }
+
+        index += node.length;
+    }
+
+
+    cursorIndex = best.index;
 
     renderEditor();
 }
