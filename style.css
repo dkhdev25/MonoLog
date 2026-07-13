@@ -300,7 +300,7 @@ h1 {
     background: white;
     margin-left: 2px;
     vertical-align: -3px;
-    animation: blink 1s steps(1) infinite;
+    animation: blink 0.5s steps(1) infinite;
 }
 
 @keyframes blink {

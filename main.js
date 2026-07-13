@@ -29,7 +29,7 @@ let currentSuggestion = "";
 const groups = [
   {
     name: "letters",
-    keys: "abcdefghijklmnopqrstuvwxyz".split("")
+    keys: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
   },
 
   {
@@ -63,7 +63,7 @@ fetch("./words.txt")
     .then(text => {
         words = text
             .split("\n")
-            .map(word => word.trim())
+            .map(word => word.trim().toUpperCase())
             .filter(word => word.length);
     });
 
@@ -293,24 +293,27 @@ function typeCharacter(){
 
     currentDevlog.content = editorText;
 
-    renderEditor();
     updateSuggestion();
 }
 
-function renderEditor(){
+function renderEditor() {
 
-    let text = document.querySelector(".text");
+    const text = document.querySelector(".text");
 
-    let remaining = "";
-
-    if(currentSuggestion){
-        remaining = currentSuggestion.slice(getCurrentWord().length);
+    if (mode !== 3 || currentSuggestion === "") {
+        text.innerHTML =
+            editorText +
+            `<span class="cursor"></span>`;
+        return;
     }
 
+    const remaining = currentSuggestion.slice(getCurrentWord().length);
+
     text.innerHTML =
-    editorText +
-    `<span class="suggestion">${remaining}</span>`;
-} 
+        editorText +
+        `<span class="cursor"></span>` +
+        `<span class="suggestion">${remaining}</span>`;
+}
 
 function switchMode(){
 
@@ -321,6 +324,7 @@ function switchMode(){
     }
 
     updateMode();
+    updateSuggestion();
 
 }
 
@@ -401,25 +405,22 @@ function backspace(){
 
     editorText = editorText.slice(0,-1);
 
-    currentSuggestion = "";
-
     currentDevlog.content = editorText;
 
-    renderEditor();
-
+    updateSuggestion();
 }
 
 function getCurrentWord() {
-    return editorText.split(/\s+/).pop().toLowerCase();
+    return editorText.split(/\s+/).pop().toUpperCase();
 }
 
 function getSuggestions(prefix) {
 
-    if(prefix.length < 3){
+    if(prefix.length < 2){
         return [];
     }
 
-    prefix = prefix.toLowerCase();
+    prefix = prefix.toUpperCase();
 
     let personal = learnedWords.filter(word =>
         word.startsWith(prefix)
@@ -438,6 +439,12 @@ function getSuggestions(prefix) {
 
 function updateSuggestion(){
 
+    if(mode !== 3){
+        currentSuggestion = "";
+        renderEditor();
+        return;
+    }
+
     let word = getCurrentWord();
 
     let suggestions = getSuggestions(word);
@@ -449,4 +456,6 @@ function updateSuggestion(){
     else{
         currentSuggestion = "";
     }
+
+    renderEditor();
 }
