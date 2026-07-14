@@ -328,3 +328,13 @@ h1 {
 .text {
     white-space: pre-wrap;
 }
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1em;
+    background: white;
+    margin: 0;
+    padding: 0;
+    vertical-align: -0.12em;
+}

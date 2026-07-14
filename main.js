@@ -341,9 +341,9 @@ function renderEditor(){
     );
 
 
-    const cursor = document.createTextNode(
-        "I"
-    );
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    cursor.textContent = "";
 
     text.appendChild(cursor);
 
@@ -555,9 +555,9 @@ function placeCursor(event){
 
     let index = 0;
 
-    while(walker.nextNode()){
+        while(walker.nextNode()){
 
-        const node = walker.currentNode;
+         const node = walker.currentNode;
 
         if(node.parentElement?.classList.contains("suggestion")){
             continue;
@@ -578,17 +578,14 @@ function placeCursor(event){
                 Math.abs(event.clientY - rect.top) * 3 +
                 Math.abs(event.clientX - rect.left);
 
-
             if(distance < best.distance){
-
                 best.distance = distance;
                 best.index = index + i;
-
             }
         }
 
-        index += node.length;
-    }
+    index += node.length;
+}
 
 
     cursorIndex = best.index;
