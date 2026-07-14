@@ -2,8 +2,10 @@
 import './style.css'
 
 // vars
+// global
 let scene = 'menu';
 let keybind = null;
+// start screen
 let currentIndex = -1;
 let holdTimer = null;
 let mode = 2; // 1 = change, 2 = type, 3 = fill
@@ -24,7 +26,6 @@ let devlogs = [
 
 let learnedWords = [];
 let words = [];
-let currentSuggestion = "";
 let cursorIndex = 0;
 let suggestionIndex = 0;
 let suggestions = [];
@@ -149,7 +150,7 @@ if (scene === 'selection' && key === keybind) {
 
         document.querySelector('.editor').style.display = 'flex';
         
-        renderEditor();
+        // renderEditor();
         updateMode();
         updateKeyboardDebug();
 
@@ -320,58 +321,6 @@ function typeCharacter(){
     updateSuggestion();
 }
 
-function renderEditor(){
-
-    cursorIndex = Math.max(
-        0,
-        Math.min(cursorIndex, editorText.length)
-    );
-
-    const text = document.querySelector(".text");
-
-    const beforeCursor = editorText.slice(0, cursorIndex);
-    const afterCursor = editorText.slice(cursorIndex);
-
-
-    text.textContent = "";
-
-
-    text.appendChild(
-        document.createTextNode(beforeCursor)
-    );
-
-
-    const cursor = document.createElement("span");
-    cursor.className = "cursor";
-    cursor.textContent = "";
-
-    text.appendChild(cursor);
-
-
-    if(mode === 3 && currentSuggestion){
-
-        const remaining =
-            currentSuggestion.slice(
-                getCurrentWord().length
-            );
-
-
-        const suggestion =
-            document.createElement("span");
-
-        suggestion.className = "suggestion";
-
-        suggestion.textContent = remaining;
-
-        text.appendChild(suggestion);
-    }
-
-
-    text.appendChild(
-        document.createTextNode(afterCursor)
-    );
-}
-
 function switchMode(){
 
     mode++;
@@ -512,10 +461,9 @@ function getSuggestions(prefix) {
 function updateSuggestion(){
 
     if(mode !== 3){
-        currentSuggestion = "";
         suggestions = [];
         suggestionIndex = 0;
-        renderEditor();
+        // renderEditor();
         return;
     }
 
@@ -525,70 +473,9 @@ function updateSuggestion(){
 
     suggestions = getSuggestions(word);
 
-    if(suggestions.length > 0){
-        currentSuggestion = suggestions[suggestionIndex % suggestions.length];
-    }
-
-    else{
-        currentSuggestion = "";
-        suggestionIndex = 0;
-    }
-
-    renderEditor();
+    // renderEditor();
 }
 
-document.querySelector(".editorInput").addEventListener("pointerdown", placeCursor);
-
-function placeCursor(event){
-
-    const text = document.querySelector(".text");
-
-    const walker = document.createTreeWalker(
-        text,
-        NodeFilter.SHOW_TEXT
-    );
-
-    let best = {
-        distance: Infinity,
-        index: editorText.length
-    };
-
-    let index = 0;
-
-        while(walker.nextNode()){
-
-         const node = walker.currentNode;
-
-        if(node.parentElement?.classList.contains("suggestion")){
-            continue;
-        }
-
-        for(let i = 0; i <= node.length; i++){
-
-            const range = document.createRange();
-
-            range.setStart(node, i);
-            range.setEnd(node, i);
-
-            const rect = range.getClientRects()[0];
-
-            if(!rect) continue;
-
-            const distance =
-                Math.abs(event.clientY - rect.top) * 3 +
-                Math.abs(event.clientX - rect.left);
-
-            if(distance < best.distance){
-                best.distance = distance;
-                best.index = index + i;
-            }
-        }
-
-    index += node.length;
-}
-
-
-    cursorIndex = best.index;
-
-    updateSuggestion();
+function autofill(){
+    // placeholder
 }
