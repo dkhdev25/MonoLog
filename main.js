@@ -18,6 +18,7 @@ let devlogs = [
 ];
 
 // writing scene
+let cursorLine = 0;
 let holdTimer = null;
 let mode = 2; // 1 = change, 2 = type, 3 = fill
 let waitingForSecondTap = false;
@@ -74,7 +75,87 @@ fetch("./words.txt")
             .filter(word => word.length);
     });
 
-renderEditor();
+const editor = document.getElementById("editorText");
+
+editor.addEventListener("click", (e) => {
+
+    const range = document.caretRangeFromPoint(
+        e.clientX,
+        e.clientY
+    );
+
+    if (!range) {
+        cursorIndex = editorText.length;
+        renderEditor();
+        return;
+    }
+
+
+    let index = 0;
+
+    const walker = document.createTreeWalker(
+        editor,
+        NodeFilter.SHOW_TEXT
+    );
+
+
+    let found = false;
+
+
+    while (walker.nextNode()) {
+
+        const node = walker.currentNode;
+
+
+        if(node === range.startContainer){
+
+            cursorIndex =
+                index + range.startOffset;
+
+            found = true;
+            break;
+        }
+
+
+        index += node.textContent.length;
+    }
+
+
+    if(!found){
+        cursorIndex = editorText.length;
+    }
+
+    const lines = editorText.split("\n");
+
+    let fixedIndex = 0;
+
+    for(let i = 0; i < lines.length; i++){
+
+        const lineStart = fixedIndex;
+        const lineEnd = fixedIndex + lines[i].length;
+
+
+        if(cursorIndex >= lineStart &&
+           cursorIndex <= lineEnd){
+
+            break;
+        }
+
+
+        fixedIndex += lines[i].length + 1;
+
+    }
+
+
+    cursorIndex = Math.min(
+        cursorIndex + Math.floor(fixedIndex / (lines.length || 1)),
+        editorText.length
+    );
+
+
+    renderEditor();
+
+});
 
 // start and set keybind
 document.addEventListener('keydown', (event) => {
@@ -479,30 +560,88 @@ function updateSuggestion(){
     suggestions = getSuggestions(word);
 }
 
-function autofill(){
-    // placeholder
+function autofill() {
+    if (suggestions.length === 0) return;
+
+    const current = getCurrentWord();
+    const full = suggestions[suggestionIndex];
+
+    const remaining = full.slice(current.length);
+
+    editorText =
+        editorText.slice(0, cursorIndex) +
+        remaining +
+        editorText.slice(cursorIndex);
+
+    cursorIndex += remaining.length;
+
+    currentDevlog.content = editorText;
+
+    updateSuggestion();
+    renderEditor();
 }
 
 function renderEditor() {
 
-    const text = editorText || "";
-
-    const lines = text.split("\n");
+    const lines = editorText.split("\n");
 
     const digits = String(lines.length).length;
-    document.getElementById("lineNumbers").style.width = `${16 + digits * 8}px`;
+
+    document.getElementById("lineNumbers").style.width =
+        `${16 + digits * 8}px`;
 
 
     document.getElementById("lineNumbers").innerHTML =
         lines
-        .map((_, i) => `${i + 1}.`)
+            .map((_, i) => `${i + 1}.`)
+            .join("<br>");
 
-        .join("<br>");
+
+    let html = "";
+    let index = 0;
 
 
-    document.getElementById("editorText").innerHTML =
-        lines
-        .map(line => line || " ")
-        .join("<br>");
+    lines.forEach((line, lineIndex) => {
 
+        html += `<div class="editorLine">`;
+
+
+        for (let i = 0; i <= line.length; i++) {
+
+
+            if (index === cursorIndex) {
+                html += `<span class="cursor"></span>`;
+            }
+
+
+            if (i < line.length) {
+
+                const char = line[i];
+
+                if (char === " ") {
+                    html += "&nbsp;";
+                } else {
+                    html += char;
+                }
+
+                index++;
+            }
+
+        }
+
+
+        html += `</div>`;
+
+
+        // newline character
+        if(lineIndex < lines.length - 1){
+            index++;
+        }
+
+    });
+
+
+    document.getElementById("editorText").innerHTML = html;
 }
+
+renderEditor();
