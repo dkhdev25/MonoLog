@@ -1,35 +1,38 @@
 // npx vite serve
+
+// setup
 import './style.css'
 
 // vars
-// global
+// start scene
 let scene = 'menu';
 let keybind = null;
-// start screen
+
+// selection scene
 let currentIndex = -1;
-let holdTimer = null;
-let mode = 2; // 1 = change, 2 = type, 3 = fill
-let currentGroup = 0;
-let selectedCharacter = 0;
 let holdTriggered = false;
-let tapTimer = null;
-let waitingForSecondTap = false;
-let groupTimer = null;
-let currentDevlog = null;
-let editorText = "";
-let keyHeld = false;
 let devlogs = [
   { title: 'Devlog 1', content: '' },
   { title: 'Devlog 2', content: '' },
   { title: 'Devlog 3', content: '' }
 ];
 
+// writing scene
+let holdTimer = null;
+let mode = 2; // 1 = change, 2 = type, 3 = fill
+let waitingForSecondTap = false;
 let learnedWords = [];
 let words = [];
 let cursorIndex = 0;
 let suggestionIndex = 0;
 let suggestions = [];
-
+let currentDevlog = null;
+let groupTimer = null;
+let editorText = "";
+let keyHeld = false;
+let currentGroup = 0;
+let selectedCharacter = 0;
+let tapTimer = null;
 const groups = [
   {
     name: "letters",
@@ -71,9 +74,11 @@ fetch("./words.txt")
             .filter(word => word.length);
     });
 
+renderEditor();
+
 // start and set keybind
 document.addEventListener('keydown', (event) => {
-  const key = event.key.toLowerCase();
+    const key = event.key.toLowerCase();
 
     // set keybind
     if (scene === 'menu' && keybind === null) {
@@ -84,83 +89,81 @@ document.addEventListener('keydown', (event) => {
         keybind = key;
         
         setTimeout(() => {
-        document.querySelector('.app').style.display = 'none';
-        scene = 'selection';
-        document.querySelector('.selectionHint').style.animation = 'fadeIn 0.6s ease-out 0.5s forwards';
-        document.querySelector('.selection').style.display = 'block';
+            document.querySelector('.app').style.display = 'none';
+            scene = 'selection';
+            document.querySelector('.selectionHint').style.animation = 'fadeIn 0.6s ease-out 0.5s forwards';
+            document.querySelector('.selection').style.display = 'block';
 
-        currentIndex = 0;
-        updateSelection();
+            currentIndex = 0;
+            updateSelection();
 
-        const cards = document.querySelectorAll('.devlog-card');
+            const cards = document.querySelectorAll('.devlog-card');
 
-        cards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add('show');
-          }, index * 120);
-        });
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 120);
+            });
 
         }, 600);
     }
 
-// selection
-if (scene === 'selection' && key === keybind) {
-  holdTriggered = false;
+    // selection
+    if (scene === 'selection' && key === keybind) {
+        holdTriggered = false;
 
-  const selectedIndex = currentIndex;
+        const selectedIndex = currentIndex;
 
-  holdTimer = setTimeout(() => {
+        holdTimer = setTimeout(() => {
 
-    holdTriggered = true;
+            holdTriggered = true;
 
-    document.querySelector(".selectionHint").style.animation =
-        "fadeOutUpHint 0.4s ease forwards";
+            document.querySelector(".selectionHint").style.animation =
+                "fadeOutUpHint 0.4s ease forwards";
 
-    const cards = document.querySelectorAll(".devlog-card");
+            const cards = document.querySelectorAll(".devlog-card");
 
-    cards.forEach((card, index) => {
-      setTimeout(() => {
-          card.classList.add("hide");
-      }, index * 120);
-    });
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add("hide");
+                }, index * 120);
+            });
 
-    setTimeout(() => {
-        document.querySelector(".selection").style.display = "none";
-        scene = "writing";
+            setTimeout(() => {
+                document.querySelector(".selection").style.display = "none";
+                scene = "writing";
 
-        if (selectedIndex === devlogs.length) {
-          currentDevlog = {
-            title: "New Devlog",
-            content: ""
-          };
+                if (selectedIndex === devlogs.length) {
+                    currentDevlog = {
+                        title: "New Devlog",
+                        content: ""
+                    };
 
-        devlogs.push(currentDevlog);
+                    devlogs.push(currentDevlog);
 
-        } 
+                } else {
+                    currentDevlog = devlogs[selectedIndex];
+                }
 
-        else {
-          currentDevlog = devlogs[selectedIndex];
-        }
+                editorText = currentDevlog.content;
+                cursorIndex = editorText.length;
 
-        editorText = currentDevlog.content;
-        cursorIndex = editorText.length;
+                document.getElementById("devlogTitle").textContent =
+                    currentDevlog.title.toUpperCase();
 
-        document.getElementById("devlogTitle").textContent =
-        currentDevlog.title.toUpperCase();
+                document.querySelector(".editor").style.display = "flex";
 
-        document.querySelector('.editor').style.display = 'flex';
-        
-        // renderEditor();
-        updateMode();
-        updateKeyboardDebug();
+                updateMode();
+                updateKeyboardDebug();
 
-        document.querySelectorAll('.panel').forEach((panel) => {
-          panel.classList.add('show');
-        });
-    }, 900);
+                document.querySelectorAll(".panel").forEach((panel) => {
+                    panel.classList.add("show");
+                });
 
-  }, 500);
-}
+            }, 900);
+
+        }, 500);
+    }
 
     // writing
     if (scene === "writing" && key === keybind) {
@@ -172,7 +175,7 @@ if (scene === 'selection' && key === keybind) {
 
         holdTimer = setTimeout(() => {
 
-        if (!keyHeld) return;
+            if (!keyHeld) return;
 
             holdTriggered = true;
 
@@ -180,15 +183,15 @@ if (scene === 'selection' && key === keybind) {
 
             if(groupTimer) return;
 
-            groupTimer = setInterval(() => {
+        groupTimer = setInterval(() => {
             if(keyHeld){
                 handleHold();
             }
         }, 120);
 
-}, 600);
+        }, 600);
 
-}
+    }
 });
 
 document.addEventListener('keyup', (event) => {
@@ -319,6 +322,7 @@ function typeCharacter(){
     currentDevlog.content = editorText;
 
     updateSuggestion();
+    renderEditor();
 }
 
 function switchMode(){
@@ -422,6 +426,7 @@ function backspace(){
     currentDevlog.content = editorText;
 
     updateSuggestion();
+    renderEditor();
 }
 
 function getCurrentWord() {
@@ -463,7 +468,6 @@ function updateSuggestion(){
     if(mode !== 3){
         suggestions = [];
         suggestionIndex = 0;
-        // renderEditor();
         return;
     }
 
@@ -472,10 +476,12 @@ function updateSuggestion(){
     suggestionIndex = 0;
 
     suggestions = getSuggestions(word);
-
-    // renderEditor();
 }
 
 function autofill(){
     // placeholder
+}
+
+function renderEditor() {
+    document.getElementById("editorText").textContent = editorText;
 }
