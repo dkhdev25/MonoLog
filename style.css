@@ -303,7 +303,7 @@ h1 {
     display: flex;
 
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - 30px);
 
     margin-top: 0;
 
@@ -317,7 +317,6 @@ h1 {
 
 .lineNumbers {
 
-    width: 40px;
     flex-shrink: 0;
     
     color: rgba(255,255,255,0.6);
@@ -345,8 +344,8 @@ h1 {
 }
 
 .devlogEditor::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
 }
 
 .devlogEditor::-webkit-scrollbar-track {
@@ -354,5 +353,17 @@ h1 {
 }
 
 .devlogEditor::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.22);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 0;
+}
+
+.devlogEditor::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.45);
+    background-clip: content-box;
+}
+
+.devlogEditor::-webkit-scrollbar-corner {
+    background: transparent;
 }

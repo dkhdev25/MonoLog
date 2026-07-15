@@ -489,6 +489,9 @@ function renderEditor() {
 
     const lines = text.split("\n");
 
+    const digits = String(lines.length).length;
+    document.getElementById("lineNumbers").style.width = `${16 + digits * 8}px`;
+
 
     document.getElementById("lineNumbers").innerHTML =
         lines
