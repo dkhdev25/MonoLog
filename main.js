@@ -155,6 +155,7 @@ document.addEventListener('keydown', (event) => {
 
                 updateMode();
                 updateKeyboardDebug();
+                renderEditor();
 
                 document.querySelectorAll(".panel").forEach((panel) => {
                     panel.classList.add("show");
@@ -483,5 +484,22 @@ function autofill(){
 }
 
 function renderEditor() {
-    document.getElementById("editorText").textContent = editorText;
+
+    const text = editorText || "";
+
+    const lines = text.split("\n");
+
+
+    document.getElementById("lineNumbers").innerHTML =
+        lines
+        .map((_, i) => `${i + 1}.`)
+
+        .join("<br>");
+
+
+    document.getElementById("editorText").innerHTML =
+        lines
+        .map(line => line || " ")
+        .join("<br>");
+
 }

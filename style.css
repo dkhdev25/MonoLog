@@ -299,24 +299,60 @@ h1 {
     }
 }
 
-.editorInput {
+.devlogEditor {
+    display: flex;
+
     width: 100%;
     height: calc(100% - 60px);
 
-    color: white;
-    text-shadow: 0 0 5px rgba(255,255,255,0.25);
+    margin-top: 0;
 
     font-family: "Droid Sans Mono", monospace;
     font-size: 14px;
-    font-weight: 400;
     line-height: 1.7;
 
-    margin: 0;
-
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-
     overflow: auto;
+}
+
+
+.lineNumbers {
+
+    width: 40px;
+    flex-shrink: 0;
+    
+    color: rgba(255,255,255,0.6);
 
     text-align: left;
+    padding-right: 0px;
+
+    user-select: none;
+}
+
+.editorText {
+    flex: 1;
+
+    color: white;
+
+    white-space: pre;
+    overflow-wrap: normal;
+
+    text-align: left;
+
+    padding-right: 20px;
+    padding-bottom: 30px;
+
+    overflow: visible;
+}
+
+.devlogEditor::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.devlogEditor::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.devlogEditor::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.7);
 }
