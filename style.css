@@ -301,6 +301,7 @@ h1 {
 
 .devlogEditor {
     display: flex;
+    position: relative;
 
     width: 100%;
     height: calc(100% - 30px);
@@ -325,6 +326,11 @@ h1 {
     padding-right: 0px;
 
     user-select: none;
+}
+
+.editorLine{
+    white-space:pre;
+    min-height:1.7em;
 }
 
 .editorText {
@@ -366,4 +372,19 @@ h1 {
 
 .devlogEditor::-webkit-scrollbar-corner {
     background: transparent;
+}
+
+.cursor {
+    display: inline-block;
+
+    width: 8px;
+    height: 1.2em;
+
+    background: white;
+
+    animation: blink 1s step-end infinite;
+
+    vertical-align: text-bottom;
+
+    pointer-events: none;
 }
