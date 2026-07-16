@@ -337,10 +337,18 @@ function typeCharacter() {
 
     cursorIndex++;
   } else if (char === "Enter") {
+
+    let word = getCurrentWord();
+
+    if (word.length >= 3 && !learnedWords.includes(word)) {
+      learnedWords.push(word);
+    }
+
     editorText =
       editorText.slice(0, cursorIndex) + "\n" + editorText.slice(cursorIndex);
 
     cursorIndex++;
+  
   } else if (char === "Tab") {
     editorText =
       editorText.slice(0, cursorIndex) + "    " + editorText.slice(cursorIndex);
@@ -368,6 +376,7 @@ function switchMode() {
 
   updateMode();
   updateSuggestion();
+  renderEditor();
 }
 
 function nextGroup() {
@@ -413,7 +422,7 @@ function handleHold() {
   } else if (mode === 2) {
     backspace();
   } else if (mode === 3) {
-    autofill();
+    cycleSuggestion();
   }
 }
 
@@ -436,7 +445,10 @@ function backspace() {
 function getCurrentWord() {
   let beforeCursor = editorText.slice(0, cursorIndex);
 
-  return beforeCursor.split(/\s+/).pop().toUpperCase();
+  return beforeCursor
+    .split(/[\s.,!?;:"'(){}\[\]]+/)
+    .pop()
+    .toUpperCase();
 }
 
 function getSuggestions(prefix) {
@@ -488,6 +500,21 @@ function autofill() {
   renderEditor();
 }
 
+function cycleSuggestion() {
+
+  if (suggestions.length === 0) {
+    return;
+  }
+
+  suggestionIndex++;
+
+  if (suggestionIndex >= suggestions.length) {
+    suggestionIndex = 0;
+  }
+
+  renderEditor();
+}
+
 function renderEditor() {
   const lines = editorText.split("\n");
 
@@ -508,8 +535,26 @@ function renderEditor() {
     for (let i = 0; i <= line.length; i++) {
       // cursor position
       if (index === cursorIndex) {
-        html += `<span class="cursor"></span>`;
-      }
+
+  html += `<span class="cursor"></span>`;
+
+  if (mode === 3 && suggestions.length > 0) {
+
+    const current = getCurrentWord();
+    const suggestion = suggestions[suggestionIndex];
+
+    if (
+      current.length > 0 &&
+      suggestion.startsWith(current)
+    ) {
+
+      const remaining = suggestion.slice(current.length);
+
+      html += `<span class="ghost">${remaining}</span>`;
+
+    }
+  }
+}
 
       // character rendering
       if (i < line.length) {

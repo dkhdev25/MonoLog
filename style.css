@@ -388,3 +388,8 @@ h1 {
 
     pointer-events: none;
 }
+
+.ghost {
+    opacity: 0.35;
+    pointer-events: none;
+}
