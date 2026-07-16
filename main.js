@@ -1,8 +1,5 @@
 // npx vite serve
 
-// setup
-import "./style.css";
-
 // vars
 // start scene
 let scene = "menu";

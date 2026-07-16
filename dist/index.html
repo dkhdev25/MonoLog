@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MonoLog</title>
+    <link rel="icon" type="image/png" href="/assets/logo-DDvb9H9X.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700..600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Droid+Sans+Mono:wght@400..700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/index-CELkT4qU.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DW0HSXwU.css">
+</head>
+
+<body>
+
+
+    <div class="app">
+        <h1>MONOLOG</h1>
+
+        <p class="about">
+        A minimalist website for writing <strong>personal devlogs</strong>. This project uses a 
+        <strong>single-key</strong> interaction system. Designed for ease of use, it focuses on 
+        <strong>organization</strong>, <strong>simplicity</strong>, and <strong>productivity</strong>...
+        </p>
+
+        <p class="hint">press any key to begin</p>
+    </div>
+
+        <p class="selectionHint">tap your key to select next devlog, hold your key to enter it</p>
+
+        <div class="selection">
+            <div class="devlog-container">
+            <div class="devlog-card" data-index="0">Devlog 1</div>
+            <div class="devlog-card" data-index="1">Devlog 2</div>
+            <div class="devlog-card" data-index="2">Devlog 3</div>
+            <div class="devlog-card create-new" data-index="3">+ Create New</div>
+        </div>
+    </div>
+
+        <div class="editor">
+            <div class="panel panelWriting">
+                <h2 id="devlogTitle">DEVLOG:</h2>
+                
+                <div class="devlogEditor">
+
+                    <div class="lineNumbers" id="lineNumbers"></div>
+
+                    <div class="editorText" id="editorText"></div>
+
+                </div>
+            </div>
+
+            <div class="panel panelHelp">
+                <h2>HELP:</h2>
+                <p>3 modes: change key, type key, & autofill.</p>
+                <p>Double tap to switch mode.</p>
+                <p>Change key mode: tap to change key, hold to switch through character groups.</p>
+                <p>Type key mode: tap to type that key, hold to backspace.</p>
+                <p>Autofill mode: tap to fill word, hold to cycle through options.</p>
+
+                <h2>DEBUG</h2>
+                <p>Mode: <span id="modeText">Change Key</span></p>
+                <p>Group: <span id="groupText"></span></p>
+                <p>Key: <span id="keyText"></span></p>
+            </div>
+        </div>
+
+
+</body>
+
+</html>
