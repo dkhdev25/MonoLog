@@ -1,20 +1,20 @@
 // npx vite serve
 
 // setup
-import './style.css'
+import "./style.css";
 
 // vars
 // start scene
-let scene = 'menu';
+let scene = "menu";
 let keybind = null;
 
 // selection scene
 let currentIndex = -1;
 let holdTriggered = false;
 let devlogs = [
-  { title: 'Devlog 1', content: '' },
-  { title: 'Devlog 2', content: '' },
-  { title: 'Devlog 3', content: '' }
+  { title: "Devlog 1", content: "" },
+  { title: "Devlog 2", content: "" },
+  { title: "Devlog 3", content: "" },
 ];
 
 // writing scene
@@ -37,611 +37,503 @@ let tapTimer = null;
 const groups = [
   {
     name: "letters",
-    keys: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+    keys: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
   },
 
   {
     name: "numbers",
-    keys: "0123456789".split("")
+    keys: "0123456789".split(""),
   },
 
   {
     name: "symbols",
     keys: [
-      ".", ",", "!", "?", "'", "\"",
-      "(", ")", "[", "]", "{", "}",
-      "+", "-", "*", "/", "=",
-      "@", "#", "$", "%", "&",
-      ":", ";", "_"
-    ]
+      ".",
+      ",",
+      "!",
+      "?",
+      "'",
+      '"',
+      "(",
+      ")",
+      "[",
+      "]",
+      "{",
+      "}",
+      "+",
+      "-",
+      "*",
+      "/",
+      "=",
+      "@",
+      "#",
+      "$",
+      "%",
+      "&",
+      ":",
+      ";",
+      "_",
+    ],
   },
 
   {
     name: "actions",
-    keys: [
-      "Space",
-      "Enter",
-      "Tab"
-    ]
-  }
+    keys: ["Space", "Enter", "Tab"],
+  },
 ];
 
 fetch("./words.txt")
-    .then(response => response.text())
-    .then(text => {
-        words = text
-            .split("\n")
-            .map(word => word.trim().toUpperCase())
-            .filter(word => word.length);
-    });
+  .then((response) => response.text())
+  .then((text) => {
+    words = text
+      .split("\n")
+      .map((word) => word.trim().toUpperCase())
+      .filter((word) => word.length);
+  });
 
 const editor = document.getElementById("editorText");
 
 editor.addEventListener("click", (e) => {
+  const lineElement = e.target.closest(".editorLine");
 
-    const range = document.caretRangeFromPoint(
-        e.clientX,
-        e.clientY
-    );
+  if (!lineElement) {
+    cursorIndex = editorText.length;
+    renderEditor();
+    return;
+  }
 
-    if (!range) {
-        cursorIndex = editorText.length;
-        renderEditor();
-        return;
-    }
+  const lines = editorText.split("\n");
 
+  const lineIndex = [...document.querySelectorAll(".editorLine")].indexOf(
+    lineElement
+  );
 
-    let index = 0;
+  const range = document.caretRangeFromPoint(e.clientX, e.clientY);
 
-    const walker = document.createTreeWalker(
-        editor,
-        NodeFilter.SHOW_TEXT
-    );
+  let column = 0;
 
-
-    let found = false;
-
+  if (range) {
+    const walker = document.createTreeWalker(lineElement, NodeFilter.SHOW_TEXT);
 
     while (walker.nextNode()) {
+      const node = walker.currentNode;
 
-        const node = walker.currentNode;
+      if (node === range.startContainer) {
+        column += range.startOffset;
+        break;
+      }
 
-
-        if(node === range.startContainer){
-
-            cursorIndex =
-                index + range.startOffset;
-
-            found = true;
-            break;
-        }
-
-
-        index += node.textContent.length;
+      column += node.textContent.length;
     }
+  }
 
+  let index = 0;
 
-    if(!found){
-        cursorIndex = editorText.length;
-    }
+  for (let i = 0; i < lineIndex; i++) {
+    index += lines[i].length + 1;
+  }
 
-    const lines = editorText.split("\n");
+  cursorIndex = index + column;
 
-    let fixedIndex = 0;
+  // safety
+  cursorIndex = Math.max(0, Math.min(cursorIndex, editorText.length));
 
-    for(let i = 0; i < lines.length; i++){
-
-        const lineStart = fixedIndex;
-        const lineEnd = fixedIndex + lines[i].length;
-
-
-        if(cursorIndex >= lineStart &&
-           cursorIndex <= lineEnd){
-
-            break;
-        }
-
-
-        fixedIndex += lines[i].length + 1;
-
-    }
-
-
-    cursorIndex = Math.min(
-        cursorIndex + Math.floor(fixedIndex / (lines.length || 1)),
-        editorText.length
-    );
-
-
-    renderEditor();
-
+  renderEditor();
 });
 
 // start and set keybind
-document.addEventListener('keydown', (event) => {
-    const key = event.key.toLowerCase();
+document.addEventListener("keydown", (event) => {
+  const key = event.key.toLowerCase();
 
-    // set keybind
-    if (scene === 'menu' && keybind === null) {
-        document.querySelector('.about').style.animation = 'none';
-        document.querySelector('h1').style.animation = 'fadeOutUp 0.6s ease-out forwards';
-        document.querySelector('.about').style.animation = 'fadeOutUpText 0.6s ease-out 0.1s forwards';
-        document.querySelector('.hint').style.animation = 'fadeOutUpHint 0.6s ease-out forwards';
-        keybind = key;
-        
+  // set keybind
+  if (scene === "menu" && keybind === null) {
+    document.querySelector(".about").style.animation = "none";
+    document.querySelector("h1").style.animation =
+      "fadeOutUp 0.6s ease-out forwards";
+    document.querySelector(".about").style.animation =
+      "fadeOutUpText 0.6s ease-out 0.1s forwards";
+    document.querySelector(".hint").style.animation =
+      "fadeOutUpHint 0.6s ease-out forwards";
+    keybind = key;
+
+    setTimeout(() => {
+      document.querySelector(".app").style.display = "none";
+      scene = "selection";
+      document.querySelector(".selectionHint").style.animation =
+        "fadeIn 0.6s ease-out 0.5s forwards";
+      document.querySelector(".selection").style.display = "block";
+
+      currentIndex = 0;
+      updateSelection();
+
+      const cards = document.querySelectorAll(".devlog-card");
+
+      cards.forEach((card, index) => {
         setTimeout(() => {
-            document.querySelector('.app').style.display = 'none';
-            scene = 'selection';
-            document.querySelector('.selectionHint').style.animation = 'fadeIn 0.6s ease-out 0.5s forwards';
-            document.querySelector('.selection').style.display = 'block';
+          card.classList.add("show");
+        }, index * 120);
+      });
+    }, 600);
+  }
 
-            currentIndex = 0;
-            updateSelection();
+  // selection
+  if (scene === "selection" && key === keybind) {
+    holdTriggered = false;
 
-            const cards = document.querySelectorAll('.devlog-card');
+    const selectedIndex = currentIndex;
 
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('show');
-                }, index * 120);
-            });
+    holdTimer = setTimeout(() => {
+      holdTriggered = true;
 
-        }, 600);
-    }
+      document.querySelector(".selectionHint").style.animation =
+        "fadeOutUpHint 0.4s ease forwards";
 
-    // selection
-    if (scene === 'selection' && key === keybind) {
-        holdTriggered = false;
+      const cards = document.querySelectorAll(".devlog-card");
 
-        const selectedIndex = currentIndex;
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add("hide");
+        }, index * 120);
+      });
 
-        holdTimer = setTimeout(() => {
+      setTimeout(() => {
+        document.querySelector(".selection").style.display = "none";
+        scene = "writing";
 
-            holdTriggered = true;
+        if (selectedIndex === devlogs.length) {
+          currentDevlog = {
+            title: "New Devlog",
+            content: "",
+          };
 
-            document.querySelector(".selectionHint").style.animation =
-                "fadeOutUpHint 0.4s ease forwards";
+          devlogs.push(currentDevlog);
+        } else {
+          currentDevlog = devlogs[selectedIndex];
+        }
 
-            const cards = document.querySelectorAll(".devlog-card");
+        editorText = currentDevlog.content;
+        cursorIndex = editorText.length;
 
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add("hide");
-                }, index * 120);
-            });
+        document.getElementById("devlogTitle").textContent =
+          currentDevlog.title.toUpperCase();
 
-            setTimeout(() => {
-                document.querySelector(".selection").style.display = "none";
-                scene = "writing";
+        document.querySelector(".editor").style.display = "flex";
 
-                if (selectedIndex === devlogs.length) {
-                    currentDevlog = {
-                        title: "New Devlog",
-                        content: ""
-                    };
+        updateMode();
+        updateKeyboardDebug();
+        renderEditor();
 
-                    devlogs.push(currentDevlog);
+        document.querySelectorAll(".panel").forEach((panel) => {
+          panel.classList.add("show");
+        });
+      }, 900);
+    }, 500);
+  }
 
-                } else {
-                    currentDevlog = devlogs[selectedIndex];
-                }
+  // writing
+  if (scene === "writing" && key === keybind) {
+    if (event.repeat) return;
 
-                editorText = currentDevlog.content;
-                cursorIndex = editorText.length;
+    keyHeld = true;
+    holdTriggered = false;
 
-                document.getElementById("devlogTitle").textContent =
-                    currentDevlog.title.toUpperCase();
+    holdTimer = setTimeout(() => {
+      if (!keyHeld) return;
 
-                document.querySelector(".editor").style.display = "flex";
+      holdTriggered = true;
 
-                updateMode();
-                updateKeyboardDebug();
-                renderEditor();
+      handleHold();
 
-                document.querySelectorAll(".panel").forEach((panel) => {
-                    panel.classList.add("show");
-                });
+      if (groupTimer) return;
 
-            }, 900);
-
-        }, 500);
-    }
-
-    // writing
-    if (scene === "writing" && key === keybind) {
-        
-         if(event.repeat) return;
-
-        keyHeld = true;
-        holdTriggered = false;
-
-        holdTimer = setTimeout(() => {
-
-            if (!keyHeld) return;
-
-            holdTriggered = true;
-
-            handleHold();
-
-            if(groupTimer) return;
-
-        groupTimer = setInterval(() => {
-            if(keyHeld){
-                handleHold();
-            }
-        }, 120);
-
-        }, 600);
-
-    }
+      groupTimer = setInterval(() => {
+        if (keyHeld) {
+          handleHold();
+        }
+      }, 120);
+    }, 600);
+  }
 });
 
-document.addEventListener('keyup', (event) => {
-    const key = event.key.toLowerCase();
-    if(key !== keybind) return;
+document.addEventListener("keyup", (event) => {
+  const key = event.key.toLowerCase();
+  if (key !== keybind) return;
 
-    if (scene === "writing" && key === keybind) {
+  if (scene === "writing" && key === keybind) {
+    keyHeld = false;
 
-        keyHeld = false;
+    clearTimeout(holdTimer);
+    clearInterval(groupTimer);
 
-        clearTimeout(holdTimer);
-        clearInterval(groupTimer);
+    holdTimer = null;
+    groupTimer = null;
 
-        holdTimer = null;
-        groupTimer = null;
-
-        if (!holdTriggered) {
-            handleTap();
-        }
-
-        holdTriggered = false;
-
+    if (!holdTriggered) {
+      handleTap();
     }
 
-    if (scene === 'selection' && key === keybind) {
+    holdTriggered = false;
+  }
 
-        if (!holdTriggered) {
-            clearTimeout(holdTimer);
+  if (scene === "selection" && key === keybind) {
+    if (!holdTriggered) {
+      clearTimeout(holdTimer);
 
-            currentIndex = (currentIndex + 1) % document.querySelectorAll('.devlog-card').length;
-            updateSelection();
-        }
+      currentIndex =
+        (currentIndex + 1) % document.querySelectorAll(".devlog-card").length;
+      updateSelection();
     }
+  }
 });
 
 function updateSelection() {
-  const cards = document.querySelectorAll('.devlog-card');
+  const cards = document.querySelectorAll(".devlog-card");
   cards.forEach((card, i) => {
-    card.classList.remove('active');
-    if (i === currentIndex) card.classList.add('active');
+    card.classList.remove("active");
+    if (i === currentIndex) card.classList.add("active");
   });
 }
 
 function updateMode() {
-    const modeText = document.getElementById("modeText");
+  const modeText = document.getElementById("modeText");
 
-    if (mode === 1)
-        modeText.textContent = "Change Key";
-
-    else if (mode === 2)
-        modeText.textContent = "Type Key";
-
-    else
-        modeText.textContent = "Autofill";
+  if (mode === 1) modeText.textContent = "Change Key";
+  else if (mode === 2) modeText.textContent = "Type Key";
+  else modeText.textContent = "Autofill";
 }
 
 function selectedKey() {
-    return groups[currentGroup].keys[selectedCharacter];
+  return groups[currentGroup].keys[selectedCharacter];
 }
 
 function updateKeyboardDebug() {
-    document.getElementById("groupText").textContent =
-        groups[currentGroup].name;
+  document.getElementById("groupText").textContent = groups[currentGroup].name;
 
-    document.getElementById("keyText").textContent =
-        selectedKey();
+  document.getElementById("keyText").textContent = selectedKey();
 }
 
-function nextCharacter(){
+function nextCharacter() {
+  selectedCharacter++;
 
-    selectedCharacter++;
-
-    if(selectedCharacter >= groups[currentGroup].keys.length){
-        selectedCharacter = 0;
-    }
-
-    updateKeyboardDebug();
-}
-
-
-function typeCharacter(){
-
-    let char = selectedKey();
-
-    if(char === "Space"){
-
-        let word = getCurrentWord();
-
-        if(word.length >= 3 && !learnedWords.includes(word)){
-            learnedWords.push(word);
-        }
-
-        editorText =
-        editorText.slice(0, cursorIndex) +
-        " " +
-        editorText.slice(cursorIndex);
-
-        cursorIndex++;
-    }
-
-    else if(char === "Enter"){
-        editorText =
-        editorText.slice(0, cursorIndex) +
-        "\n" +
-        editorText.slice(cursorIndex);
-
-        cursorIndex++;
-    }
-
-    else if(char === "Tab"){
-        editorText =
-        editorText.slice(0, cursorIndex) +
-        "    " +
-        editorText.slice(cursorIndex);
-
-        cursorIndex += 4;
-    }
-
-    else{
-        editorText =
-        editorText.slice(0, cursorIndex) +
-        char +
-        editorText.slice(cursorIndex);
-
-        cursorIndex += char.length;
-    }
-
-    currentDevlog.content = editorText;
-
-    updateSuggestion();
-    renderEditor();
-}
-
-function switchMode(){
-
-    mode++;
-
-    if(mode > 3){
-        mode = 1;
-    }
-
-    updateMode();
-    updateSuggestion();
-
-}
-
-function nextGroup(){
-
-    currentGroup++;
-
-    if(currentGroup >= groups.length){
-        currentGroup = 0;
-    }
-
+  if (selectedCharacter >= groups[currentGroup].keys.length) {
     selectedCharacter = 0;
+  }
 
-    updateKeyboardDebug();
-
+  updateKeyboardDebug();
 }
 
-function handleTap(){
+function typeCharacter() {
+  let char = selectedKey();
 
-    if(waitingForSecondTap){
+  if (char === "Space") {
+    let word = getCurrentWord();
 
-        clearTimeout(tapTimer);
-        tapTimer = null;
-        waitingForSecondTap = false;
-
-        switchMode();
-        return;
-    }
-
-
-    waitingForSecondTap = true;
-
-
-    tapTimer = setTimeout(() => {
-
-        waitingForSecondTap = false;
-
-        if(mode === 1){
-            nextCharacter();
-        }
-
-        else if(mode === 2){
-            typeCharacter();
-        }
-
-        else if(mode === 3){
-            autofill();
-        }
-
-    }, 190);
-
-}
-
-
-function handleHold(){
-
-    if(mode === 1){
-
-        nextGroup();
-
-    }
-
-    else if(mode === 2){
-
-        backspace();
-
-    }
-
-    else if(mode === 3){
-
-        autofill();
-
-    }
-
-}
-
-function backspace(){
-
-    if(cursorIndex <= 0){
-        return;
+    if (word.length >= 3 && !learnedWords.includes(word)) {
+      learnedWords.push(word);
     }
 
     editorText =
-        editorText.slice(0, cursorIndex - 1) +
-        editorText.slice(cursorIndex);
+      editorText.slice(0, cursorIndex) + " " + editorText.slice(cursorIndex);
 
-    cursorIndex--;
+    cursorIndex++;
+  } else if (char === "Enter") {
+    editorText =
+      editorText.slice(0, cursorIndex) + "\n" + editorText.slice(cursorIndex);
 
-    currentDevlog.content = editorText;
+    cursorIndex++;
+  } else if (char === "Tab") {
+    editorText =
+      editorText.slice(0, cursorIndex) + "    " + editorText.slice(cursorIndex);
 
-    updateSuggestion();
-    renderEditor();
+    cursorIndex += 4;
+  } else {
+    editorText =
+      editorText.slice(0, cursorIndex) + char + editorText.slice(cursorIndex);
+
+    cursorIndex += char.length;
+  }
+
+  currentDevlog.content = editorText;
+
+  updateSuggestion();
+  renderEditor();
+}
+
+function switchMode() {
+  mode++;
+
+  if (mode > 3) {
+    mode = 1;
+  }
+
+  updateMode();
+  updateSuggestion();
+}
+
+function nextGroup() {
+  currentGroup++;
+
+  if (currentGroup >= groups.length) {
+    currentGroup = 0;
+  }
+
+  selectedCharacter = 0;
+
+  updateKeyboardDebug();
+}
+
+function handleTap() {
+  if (waitingForSecondTap) {
+    clearTimeout(tapTimer);
+    tapTimer = null;
+    waitingForSecondTap = false;
+
+    switchMode();
+    return;
+  }
+
+  waitingForSecondTap = true;
+
+  tapTimer = setTimeout(() => {
+    waitingForSecondTap = false;
+
+    if (mode === 1) {
+      nextCharacter();
+    } else if (mode === 2) {
+      typeCharacter();
+    } else if (mode === 3) {
+      autofill();
+    }
+  }, 190);
+}
+
+function handleHold() {
+  if (mode === 1) {
+    nextGroup();
+  } else if (mode === 2) {
+    backspace();
+  } else if (mode === 3) {
+    autofill();
+  }
+}
+
+function backspace() {
+  if (cursorIndex <= 0) {
+    return;
+  }
+
+  editorText =
+    editorText.slice(0, cursorIndex - 1) + editorText.slice(cursorIndex);
+
+  cursorIndex--;
+
+  currentDevlog.content = editorText;
+
+  updateSuggestion();
+  renderEditor();
 }
 
 function getCurrentWord() {
+  let beforeCursor = editorText.slice(0, cursorIndex);
 
-    let beforeCursor = editorText.slice(0, cursorIndex);
-
-    return beforeCursor
-        .split(/\s+/)
-        .pop()
-        .toUpperCase();
-
+  return beforeCursor.split(/\s+/).pop().toUpperCase();
 }
 
 function getSuggestions(prefix) {
+  if (prefix.length < 2) {
+    return [];
+  }
 
-    if(prefix.length < 2){
-        return [];
-    }
+  prefix = prefix.toUpperCase();
 
-    prefix = prefix.toUpperCase();
+  let personal = learnedWords.filter((word) => word.startsWith(prefix));
 
-    let personal = learnedWords.filter(word =>
-        word.startsWith(prefix)
-    );
+  let dictionary = words.filter((word) => word.startsWith(prefix));
 
-    let dictionary = words.filter(word =>
-        word.startsWith(prefix)
-    );
-
-    return [
-        ...personal,
-        ...dictionary
-    ];
-
+  return [...personal, ...dictionary];
 }
 
-function updateSuggestion(){
-
-    if(mode !== 3){
-        suggestions = [];
-        suggestionIndex = 0;
-        return;
-    }
-
-    const word = getCurrentWord();
-    
+function updateSuggestion() {
+  if (mode !== 3) {
+    suggestions = [];
     suggestionIndex = 0;
+    return;
+  }
 
-    suggestions = getSuggestions(word);
+  const word = getCurrentWord();
+
+  suggestionIndex = 0;
+
+  suggestions = getSuggestions(word);
 }
 
 function autofill() {
-    if (suggestions.length === 0) return;
+  if (suggestions.length === 0) return;
 
-    const current = getCurrentWord();
-    const full = suggestions[suggestionIndex];
+  const current = getCurrentWord();
+  const full = suggestions[suggestionIndex];
 
-    const remaining = full.slice(current.length);
+  const remaining = full.slice(current.length);
 
-    editorText =
-        editorText.slice(0, cursorIndex) +
-        remaining +
-        editorText.slice(cursorIndex);
+  editorText =
+    editorText.slice(0, cursorIndex) +
+    remaining +
+    editorText.slice(cursorIndex);
 
-    cursorIndex += remaining.length;
+  cursorIndex += remaining.length;
 
-    currentDevlog.content = editorText;
+  currentDevlog.content = editorText;
 
-    updateSuggestion();
-    renderEditor();
+  updateSuggestion();
+  renderEditor();
 }
 
 function renderEditor() {
+  const lines = editorText.split("\n");
 
-    const lines = editorText.split("\n");
+  const digits = String(lines.length).length;
 
-    const digits = String(lines.length).length;
+  document.getElementById("lineNumbers").style.width = `${16 + digits * 8}px`;
 
-    document.getElementById("lineNumbers").style.width =
-        `${16 + digits * 8}px`;
+  document.getElementById("lineNumbers").innerHTML = lines
+    .map((_, i) => `${i + 1}.`)
+    .join("<br>");
 
+  let html = "";
+  let index = 0;
 
-    document.getElementById("lineNumbers").innerHTML =
-        lines
-            .map((_, i) => `${i + 1}.`)
-            .join("<br>");
+  lines.forEach((line, lineIndex) => {
+    html += `<div class="editorLine">`;
 
+    for (let i = 0; i <= line.length; i++) {
+      // cursor position
+      if (index === cursorIndex) {
+        html += `<span class="cursor"></span>`;
+      }
 
-    let html = "";
-    let index = 0;
+      // character rendering
+      if (i < line.length) {
+        const char = line[i];
 
-
-    lines.forEach((line, lineIndex) => {
-
-        html += `<div class="editorLine">`;
-
-
-        for (let i = 0; i <= line.length; i++) {
-
-
-            if (index === cursorIndex) {
-                html += `<span class="cursor"></span>`;
-            }
-
-
-            if (i < line.length) {
-
-                const char = line[i];
-
-                if (char === " ") {
-                    html += "&nbsp;";
-                } else {
-                    html += char;
-                }
-
-                index++;
-            }
-
+        if (char === " ") {
+          html += "&nbsp;";
+        } else {
+          html += char;
         }
 
+        index++;
+      }
+    }
 
-        html += `</div>`;
+    html += `</div>`;
 
+    // count newline character
+    if (lineIndex < lines.length - 1) {
+      index++;
+    }
+  });
 
-        // newline character
-        if(lineIndex < lines.length - 1){
-            index++;
-        }
-
-    });
-
-
-    document.getElementById("editorText").innerHTML = html;
+  document.getElementById("editorText").innerHTML = html;
 }
 
 renderEditor();
